@@ -1,0 +1,227 @@
+# Options for analysis running.
+run:
+  # Timeout for analysis, e.g. 30s, 5m.
+  # Default: 1m
+  timeout: 5m
+  # Exit code when at least one issue was found.
+  # Default: 1
+  #issues-exit-code: 1
+  # Include test files or not.
+  # Default: true
+  #tests: false
+
+# Settings for linters from "linters-settings".
+linters-settings:
+  gci:
+    # Section configuration to compare against.
+    # Section names are case-insensitive and may contain parameters in ().
+    # The default order of sections is `standard > default > custom > blank > dot > alias > localmodule`,
+    # If `custom-order` is `true`, it follows the order of `sections` option.
+    # Default: ["standard", "default"]
+    sections:
+      - standard # Standard section: captures all standard packages.
+      - default # Default section: contains all imports that could not be matched to another section type.
+      - prefix(github.com/org/project) # Custom section: groups all imports with the specified Prefix.
+      - blank # Blank section: contains all blank imports. This section is not present unless explicitly enabled.
+      - dot # Dot section: contains all dot imports. This section is not present unless explicitly enabled.
+      - alias # Alias section: contains all alias imports. This section is not present unless explicitly enabled.
+      - localmodule # Local module section: contains all local packages. This section is not present unless explicitly enabled.
+    # Skip generated files.
+    # Default: true
+    skip-generated: false
+    # Enable custom order of sections.
+    # If `true`, make the section order the same as the order of `sections`.
+    # Default: false
+    custom-order: false
+    # Drops lexical ordering for custom sections.
+    # Default: false
+    no-lex-order: true
+  varnamelen:
+    # The longest distance, in source lines, that is being considered a "small scope".
+    # Variables used in at most this many lines will be ignored.
+    # Default: 5
+    max-distance: 6
+    # The minimum length of a variable's name that is considered "long".
+    # Variable names that are at least this long will be ignored.
+    # Default: 3
+    min-name-length: 2
+    # Check method receivers.
+    # Default: false
+    check-receiver: true
+    # Check named return values.
+    # Default: false
+    check-return: true
+    # Check type parameters.
+    # Default: false
+    check-type-param: true
+    # Ignore "ok" variables that hold the bool return value of a type assertion.
+    # Default: false
+    ignore-type-assert-ok: true
+    # Ignore "ok" variables that hold the bool return value of a map index.
+    # Default: false
+    ignore-map-index-ok: false
+    # Ignore "ok" variables that hold the bool return value of a channel receive.
+    # Default: false
+    ignore-chan-recv-ok: false
+    # Optional list of variable names that should be ignored completely.
+    # Default: []
+    # ignore-names:
+    #   - err
+  revive:
+    # Sets the default severity.
+    # See https://github.com/mgechev/revive#configuration
+    # Default: warning
+    severity: error
+    # Enable all available rules.
+    # Default: false
+    enable-all-rules: true
+    rules:
+      - name: atomic
+      - name: line-length-limit
+        severity: error
+        arguments: [120]
+  ireturn:
+    # List of interfaces to allow.
+    allow:
+      # You can specify idiomatic endings for interface
+      - (or|er|ent)$
+  tagalign:
+    # Align and sort can be used together or separately.
+    # Default: true.
+    align: true
+    # Whether enable tags sort.
+    # Default: true
+    sort: true
+    # Specify the order of tags, the other tags will be sorted by name.
+    # This option will be ignored if `sort` is false.
+    # Default: []
+    order:
+      - json
+      - yaml
+      - yml
+      - toml
+      - mapstructure
+      - binding
+      - validate
+    # Whether enable strict style.
+    # In this style, the tags will be sorted and aligned in the dictionary order,
+    # and the tags with the same name will be aligned together.
+    # Note: This option will be ignored if 'align' or 'sort' is false.
+    # Default: false
+    strict: true
+  wsl:
+    # Add or remove empty lines.
+    # Causes an error when an If statement that checks an error variable doesn't
+    # cuddle with the assignment of that variable.
+    force-err-cuddling: true
+  mnd:
+    # An analyzer to detect magic numbers.
+    # List of enabled checks, see https://github.com/tommy-muehle/go-mnd/#checks for description.
+    # Default: ["argument", "case", "condition", "operation", "return", "assign"]
+    checks:
+      - argument
+      - case
+      - condition
+      - operation
+      - return
+      - assign
+    # List of numbers to exclude from analysis.
+    # The numbers should be written as string.
+    # Values always ignored: "1", "1.0", "0" and "0.0"
+    # Default: []
+    ignored-numbers:
+      - "0666"
+      - "0755"
+      - "42"
+    # List of file patterns to exclude from analysis.
+    # Values always ignored: `.+_test.go`
+    # Default: []
+    ignored-files:
+      - 'magic1_.+\.go$'
+  interfacebloat:
+    # The maximum number of methods allowed for an interface.
+    # Default: 10
+    max: 5
+  lll:
+    line-length: 120 # default is 120
+  nlreturn:
+    block-size: 2
+  nolintlint:
+    require-explanation: true
+    require-specific: true
+
+# List of excluded.
+issues:
+  # List of regexps of issue texts to exclude.
+  #
+  # But independently of this option we use default exclude patterns,
+  # it can be disabled by `exclude-use-default: false`.
+  # To list all excluded by default patterns execute `golangci-lint run --help`
+  #
+  # Default: https://golangci-lint.run/usage/false-positives/#default-exclusions
+  # Excluding configuration per-path, per-linter, per-text and per-source
+  exclude-rules:
+    # Exclude some linters from running on tests files.
+    - path: _test\.go
+      linters:
+        - gocyclo
+        - errcheck
+        - dupl
+        - gosec
+    # Run some linter only for test files by excluding its issues for everything else.
+    - path-except: _test\.go
+      linters:
+        - forbidigo\
+  # Exclude directories from analysis.
+  exclude-dirs:
+    - docs
+    - tests/mocs
+  # Exclude files from analysis.
+  exclude-files:
+    - ".*\\.my\\.go$"
+
+# Linters list.
+linters:
+  # Enable all available linters.
+  # Default: false
+  enable-all: true
+  # Disable specific linter
+  # https://golangci-lint.run/usage/linters/#disabled-by-default
+  disable:
+    - wsl
+    #- gofumpt # conflicts with wsl
+    - depguard # Checks if package imports are in a list of acceptable packages.
+    - ginkgolinter # Enforces standards of using ginkgo and gomega.
+    - godox # Detection of FIXME, TODO and other comment keywords.
+    - goheader # Checks if file header matches to pattern.
+    - gomodguard # Allow and block list linter for direct Go module dependencies.
+    - gosmopolitan # Report certain i18n/l10n anti-patterns in your Go codebase.
+    - ireturn # Accept Interfaces, Return Concrete Types.
+    - maintidx # Checks for maintainability index of each function.
+    - nosprintfhostport # Checks for use of fmt.Sprintf("%s:%d", host, port).
+    - paralleltest # Detects missing usage of t.Parallel() method in your Go test
+    - protogetter # Reports direct reads from proto message fields when getters should be used.
+    - testifylint # Checks usage of github.com/stretchr/testify.
+    - testpackage # Linter that makes you use a separate _test package.
+    - thelper # Thelper detects tests helpers which is not start with t.Helper() method.
+    - tparallel #Tparallel detects inappropriate usage of t.Parallel() method in your Go test codes.
+    - zerologlint # Detects the wrong usage of zerolog that a user forgets to dispatch with Send or Msg.
+
+
+  # Enable presets.
+  # https://golangci-lint.run/usage/linters
+  # Default: []
+  # presets:
+  #   - bugs
+  #   - comment
+  #   - complexity
+  #   - error
+  #   - format
+  #   - import
+  #   - metalinter
+  #   - module
+  #   - performance
+  #   - sql
+  #   - style
+  #   - test
+  #   - unused
