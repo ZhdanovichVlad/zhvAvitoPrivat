@@ -1,0 +1,28 @@
+run:
+  timeout: 5m
+  tests: true
+
+linters:
+  enable:
+    - gofmt
+    - goimports
+    - govet
+    - errcheck
+    - revive
+  disable:
+    - wsl
+    - gocyclo
+    - dupl
+    - gosec
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - errcheck
+        - dupl
+  exclude-dirs:
+    - docs
+    - tests/mocs
+  exclude-files:
+    - ".*\\.my\\.go$"
