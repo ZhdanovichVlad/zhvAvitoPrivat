@@ -1,3 +1,5 @@
+-- +goose Up
+-- +goose StatementBegin
 INSERT INTO merchandise (name, price) VALUES
     ('t-shirt',   80),
     ('cup',       20),
@@ -9,3 +11,11 @@ INSERT INTO merchandise (name, price) VALUES
     ('socks',     10),
     ('wallet',    50),
     ('pink-hoody',500);
+-- +goose StatementEnd
+
+
+
+-- +goose Down
+-- +goose StatementBegin
+
+-- +goose StatementEnd

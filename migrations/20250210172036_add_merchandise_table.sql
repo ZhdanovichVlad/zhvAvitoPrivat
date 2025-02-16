@@ -8,3 +8,5 @@ CREATE INDEX IF NOT EXISTS ind_merchandise_name ON merchandise (name);
 
 
 
+
+

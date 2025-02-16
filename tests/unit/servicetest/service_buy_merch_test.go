@@ -1,4 +1,4 @@
-package servicetest
+package servicetest_test
 
 import (
 	"context"
@@ -23,20 +23,20 @@ func TestServiceBuyMerch_UserNotFound(t *testing.T) {
 	service := service.NewService(mockRepo, slog.Default(), mockTokenGenerator)
 
 	ctx := context.Background()
-	userName := "testuser"
+	userUUID := "a831f52d-9de2-4af1-8677-4f3d1226fe22"
 
 	merchInfo := &entity.Merch{Name: "pen"}
 
 	answFalse := false
 	mockRepo.EXPECT().
-		ExistsUser(ctx, gomock.Any()).
+		ExistsUser(ctx, &userUUID).
 		Return(&answFalse, nil)
 
-	err := service.BuyMerch(ctx, &userName, merchInfo)
+	err := service.BuyMerch(ctx, &userUUID, merchInfo)
 	assert.ErrorIs(t, err, errorsx.ErrUnknownUser)
 }
 
-func TestServiceBuyMerch_ItemNotFound(t *testing.T) {
+func TestServiceBuyMerch_MerchNotFound(t *testing.T) {
 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -47,24 +47,24 @@ func TestServiceBuyMerch_ItemNotFound(t *testing.T) {
 	service := service.NewService(mockRepo, slog.Default(), mockTokenGenerator)
 
 	ctx := context.Background()
-	userName := "testuser"
+	userUUID := "a831f52d-9de2-4af1-8677-4f3d1226fed2"
 
 	merchInfo := &entity.Merch{Name: "pen"}
 
 	answTrue := true
 	mockRepo.EXPECT().
-		ExistsUser(ctx, gomock.Any()).
+		ExistsUser(ctx, &userUUID).
 		Return(&answTrue, nil)
 
 	mockRepo.EXPECT().
 		BuyMerch(ctx, gomock.Any(), gomock.Any()).
 		Return(errorsx.ErrItemNotFound)
 
-	err := service.BuyMerch(ctx, &userName, merchInfo)
+	err := service.BuyMerch(ctx, &userUUID, merchInfo)
 	assert.ErrorIs(t, err, errorsx.ErrItemNotFound)
 }
 
-func TestServiceBuyMerch_UserFound(t *testing.T) {
+func TestServiceBuyMerch_Successful(t *testing.T) {
 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -75,13 +75,13 @@ func TestServiceBuyMerch_UserFound(t *testing.T) {
 	service := service.NewService(mockRepo, slog.Default(), mockTokenGenerator)
 
 	ctx := context.Background()
-	userName := "testuser"
+	userName := "a831f52d-9de2-4af1-8677-4f3d1226fed2"
 
 	merchInfo := &entity.Merch{Name: "pen"}
 
 	answTrue := true
 	mockRepo.EXPECT().
-		ExistsUser(ctx, gomock.Any()).
+		ExistsUser(ctx, &userName).
 		Return(&answTrue, nil)
 
 	mockRepo.EXPECT().
@@ -93,7 +93,7 @@ func TestServiceBuyMerch_UserFound(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestServiceBuyMerch_ItemFound(t *testing.T) {
+func TestServiceBuyMerch_WrongUUID(t *testing.T) {
 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -104,20 +104,10 @@ func TestServiceBuyMerch_ItemFound(t *testing.T) {
 	service := service.NewService(mockRepo, slog.Default(), mockTokenGenerator)
 
 	ctx := context.Background()
-	userName := "testuser"
+	userUUID := "wrongUUID"
 
 	merchInfo := &entity.Merch{Name: "pen"}
 
-	answTrue := true
-	mockRepo.EXPECT().
-		ExistsUser(ctx, gomock.Any()).
-		Return(&answTrue, nil)
-
-	mockRepo.EXPECT().
-		BuyMerch(ctx, &userName, merchInfo).
-		Return(nil)
-
-	err := service.BuyMerch(ctx, &userName, merchInfo)
-
-	assert.NoError(t, err)
+	err := service.BuyMerch(ctx, &userUUID, merchInfo)
+	assert.ErrorIs(t, err, errorsx.ErrWrongUUID)
 }

@@ -23,8 +23,8 @@ type UserTransfer struct {
 
 type Transaction struct {
 	Sender       string
-	SenderUuid   string
+	SenderUUID   string
 	Receiver     string
-	ReceiverUuid string
+	ReceiverUUID string
 	Amount       int
 }

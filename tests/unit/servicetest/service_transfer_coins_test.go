@@ -23,28 +23,26 @@ func TestTransferCoins_Success(t *testing.T) {
 
 	service := service.NewService(mockRepo, slog.Default(), mockTokenGenerator)
 
-	userUUID := "user-123"
-	receiverUUID := "user-456"
+	userUUID := "a831f52d-9de2-4af1-8677-4f3d1226fed2"
+	receiverUUID := "a831f52d-9de2-4af1-8677-4f3d1226fyf5"
 	sendingCoinsInfo := &entity.SendingCoins{User: "receiver", Amount: 100}
 	receiver := &entity.User{UUID: receiverUUID, Username: "receiver"}
 
-	// Ожидаемые вызовы
+	answer := true
 	mockRepo.EXPECT().
 		ExistsUser(gomock.Any(), &userUUID).
-		Return(ptrBool(true), nil) // Пользователь существует
+		Return(&answer, nil)
 
 	mockRepo.EXPECT().
 		FindUser(gomock.Any(), gomock.Any()).
-		Return(receiver, nil) // Получатель найден
+		Return(receiver, nil)
 
 	mockRepo.EXPECT().
 		TransferCoins(gomock.Any(), &userUUID, &receiverUUID, &sendingCoinsInfo.Amount).
-		Return(nil) // Перевод успешен
+		Return(nil)
 
-	// Вызов тестируемой функции
 	err := service.TransferCoins(context.Background(), &userUUID, sendingCoinsInfo)
 
-	// Проверка результата
 	assert.NoError(t, err)
 }
 
@@ -57,12 +55,13 @@ func TestTransferCoins_UserNotFound(t *testing.T) {
 
 	service := service.NewService(mockRepo, slog.Default(), mockTokenGenerator)
 
-	userUUID := "user-123"
+	userUUID := "a831f52d-9de2-4af1-8677-4f3d1226fed2"
 	sendingCoinsInfo := &entity.SendingCoins{User: "receiver", Amount: 100}
 
+	answer := false
 	mockRepo.EXPECT().
 		ExistsUser(gomock.Any(), &userUUID).
-		Return(ptrBool(false), nil)
+		Return(&answer, nil)
 
 	err := service.TransferCoins(context.Background(), &userUUID, sendingCoinsInfo)
 
@@ -78,21 +77,20 @@ func TestTransferCoins_ReceiverNotFound(t *testing.T) {
 
 	service := service.NewService(mockRepo, slog.Default(), mockTokenGenerator)
 
-	userUUID := "user-123"
+	userUUID := "a831f52d-9de2-4af1-8677-4f3d1226fed2"
 	sendingCoinsInfo := &entity.SendingCoins{User: "receiver", Amount: 100}
 
+	answer := true
 	mockRepo.EXPECT().
 		ExistsUser(gomock.Any(), &userUUID).
-		Return(ptrBool(true), nil) // Пользователь существует
+		Return(&answer, nil)
 
 	mockRepo.EXPECT().
 		FindUser(gomock.Any(), gomock.Any()).
-		Return(nil, nil) // Получатель не найден
+		Return(nil, nil)
 
-	// Вызов тестируемой функции
 	err := service.TransferCoins(context.Background(), &userUUID, sendingCoinsInfo)
 
-	// Проверка результата
 	assert.ErrorIs(t, err, errorsx.ErrReceiverNotFound)
 }
 
@@ -105,23 +103,21 @@ func TestTransferCoins_ForbiddenTransaction(t *testing.T) {
 
 	service := service.NewService(mockRepo, slog.Default(), mockTokenGenerator)
 
-	userUUID := "user-123"
+	userUUID := "a831f52d-9de2-4af1-8677-4f3d1226fed2"
 	sendingCoinsInfo := &entity.SendingCoins{User: "receiver", Amount: 100}
 	receiver := &entity.User{UUID: userUUID, Username: "receiver"} // Получатель == отправитель
 
-	// Ожидаемые вызовы
+	answer := true
 	mockRepo.EXPECT().
 		ExistsUser(gomock.Any(), &userUUID).
-		Return(ptrBool(true), nil) // Пользователь существует
+		Return(&answer, nil)
 
 	mockRepo.EXPECT().
 		FindUser(gomock.Any(), gomock.Any()).
-		Return(receiver, nil) // Получатель найден
+		Return(receiver, nil)
 
-	// Вызов тестируемой функции
 	err := service.TransferCoins(context.Background(), &userUUID, sendingCoinsInfo)
 
-	// Проверка результата
 	assert.ErrorIs(t, err, errorsx.ErrForbiddenTransaction)
 }
 
@@ -134,33 +130,43 @@ func TestTransferCoins_TransferError(t *testing.T) {
 
 	service := service.NewService(mockRepo, slog.Default(), mockTokenGenerator)
 
-	userUUID := "user-123"
-	receiverUUID := "user-456"
+	userUUID := "a831f52d-9de2-4af1-8677-4f3d1226fed2"
+	receiverUUID := "a831f52d-9de2-4af1-8677-4f3d1226fyg5"
 	sendingCoinsInfo := &entity.SendingCoins{User: "receiver", Amount: 100}
 	receiver := &entity.User{UUID: receiverUUID, Username: "receiver"}
 
-	// Ожидаемые вызовы
+	answer := true
 	mockRepo.EXPECT().
 		ExistsUser(gomock.Any(), &userUUID).
-		Return(ptrBool(true), nil) // Пользователь существует
+		Return(&answer, nil)
 
 	mockRepo.EXPECT().
 		FindUser(gomock.Any(), gomock.Any()).
-		Return(receiver, nil) // Получатель найден
+		Return(receiver, nil)
 
 	expectedErr := errors.New("transfer failed")
 	mockRepo.EXPECT().
 		TransferCoins(gomock.Any(), &userUUID, &receiverUUID, &sendingCoinsInfo.Amount).
-		Return(expectedErr) // Ошибка при переводе
+		Return(expectedErr)
 
-	// Вызов тестируемой функции
 	err := service.TransferCoins(context.Background(), &userUUID, sendingCoinsInfo)
 
-	// Проверка результата
 	assert.ErrorIs(t, err, expectedErr)
 }
 
-// Вспомогательная функция для создания указателя на bool
-func ptrBool(b bool) *bool {
-	return &b
+func TestTransferCoins_WrongUUID(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockRepo := mocks.NewMockrepository(ctrl)
+	mockTokenGenerator := mocks.NewMocktokenGenerator(ctrl)
+
+	service := service.NewService(mockRepo, slog.Default(), mockTokenGenerator)
+
+	userUUID := "wrongUUID"
+	sendingCoinsInfo := &entity.SendingCoins{User: "receiver", Amount: 100}
+
+	err := service.TransferCoins(context.Background(), &userUUID, sendingCoinsInfo)
+
+	assert.ErrorIs(t, err, errorsx.ErrWrongUUID)
 }

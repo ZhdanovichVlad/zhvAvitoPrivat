@@ -1,15 +1,15 @@
 package repository
 
 import (
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"log/slog"
 )
 
-type storage struct {
-	db     *pgx.Conn
+type Storage struct {
+	db     *pgxpool.Pool
 	logger *slog.Logger
 }
 
-func NewStorage(db *pgx.Conn, logger *slog.Logger) *storage {
-	return &storage{db: db, logger: logger}
+func NewStorage(db *pgxpool.Pool, logger *slog.Logger) *Storage {
+	return &Storage{db: db, logger: logger}
 }

@@ -14,5 +14,5 @@ CREATE INDEX IF NOT EXISTS ind_users_uuid ON users (uuid);
 
 -- +goose Down
 -- +goose StatementBegin
-
+DROP TABLE IF EXISTS users
 -- +goose StatementEnd

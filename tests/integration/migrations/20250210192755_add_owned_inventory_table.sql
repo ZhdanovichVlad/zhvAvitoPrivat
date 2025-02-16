@@ -13,5 +13,5 @@ CREATE INDEX IF NOT EXISTS ind_owned_inventory_user_uuid ON owned_inventory (use
 
 -- +goose Down
 -- +goose StatementBegin
-
+DROP TABLE IF EXISTS owned_inventory
 -- +goose StatementEnd

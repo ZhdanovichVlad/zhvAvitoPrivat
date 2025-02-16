@@ -1,4 +1,4 @@
---- +goose Up
+-- +goose Up
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS transactions (
                                   uuid                        UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -15,5 +15,5 @@ CREATE INDEX IF NOT EXISTS ind_transactions_recipient_uuid  ON transactions (rec
 
 -- +goose Down
 -- +goose StatementBegin
-
+DROP TABLE IF EXISTS transactions
 -- +goose StatementEnd
