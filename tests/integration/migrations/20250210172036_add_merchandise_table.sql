@@ -1,3 +1,5 @@
+-- +goose Up
+-- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS merchandise (
     uuid         UUID        DEFAULT uuid_generate_v4() PRIMARY KEY,
     name         VARCHAR(50) NOT NULL,
@@ -5,8 +7,13 @@ CREATE TABLE IF NOT EXISTS merchandise (
     CONSTRAINT unique_name_price UNIQUE (name, price)
 );
 CREATE INDEX IF NOT EXISTS ind_merchandise_name ON merchandise (name);
+-- +goose StatementEnd
 
 
+-- +goose Down
+-- +goose StatementBegin
+DROP TABLE IF EXISTS merchandise
+-- +goose StatementEnd
 
 
 

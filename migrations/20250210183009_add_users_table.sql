@@ -1,5 +1,3 @@
--- +goose Up
--- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS users (
                        uuid          UUID         DEFAULT uuid_generate_v4() PRIMARY KEY,
                        username      VARCHAR(50)  NOT NULL,
@@ -8,11 +6,3 @@ CREATE TABLE IF NOT EXISTS users (
 );
 CREATE INDEX IF NOT EXISTS ind_users_uuid ON users (uuid);
 
-
-
--- +goose StatementEnd
-
--- +goose Down
--- +goose StatementBegin
-
--- +goose StatementEnd

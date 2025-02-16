@@ -6,7 +6,7 @@ type UserDTO struct {
 }
 
 type User struct {
-	Uuid         string
+	UUID         string
 	Username     string
 	PasswordHash string
 	Balance      int

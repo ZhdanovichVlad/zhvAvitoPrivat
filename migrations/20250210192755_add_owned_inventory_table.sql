@@ -1,5 +1,4 @@
--- +goose Up
--- +goose StatementBegin
+
 CREATE TABLE IF NOT EXISTS owned_inventory (
     user_uuid                 UUID      NOT NULL,
     merchandise_uuid          UUID      NOT NULL,
@@ -8,9 +7,4 @@ CREATE TABLE IF NOT EXISTS owned_inventory (
     CONSTRAINT fk_merchandise FOREIGN KEY (merchandise_uuid) REFERENCES merchandise(uuid) ON DELETE CASCADE
 );
 CREATE UNIQUE INDEX idx_user_merchandise ON owned_inventory (user_uuid, merchandise_uuid);
--- +goose StatementEnd
-
--- +goose Down
--- +goose StatementBegin
-
--- +goose StatementEnd
+CREATE INDEX IF NOT EXISTS ind_owned_inventory_user_uuid ON owned_inventory (user_uuid);

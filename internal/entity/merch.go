@@ -1,7 +1,7 @@
 package entity
 
 type Merch struct {
-	Uuid  string
+	UUID  string
 	Name  string
 	Price int
 }

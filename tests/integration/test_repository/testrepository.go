@@ -1,4 +1,4 @@
-package testrepository
+package test_repository
 
 import (
 	"context"
@@ -15,7 +15,7 @@ import (
 	"github.com/pressly/goose"
 )
 
-func setupTestDB(t *testing.T) *pgxpool.Pool {
+func SetupTestDB(t *testing.T) *pgxpool.Pool {
 	req := testcontainers.ContainerRequest{
 		Image:        "postgres:13",
 		ExposedPorts: []string{"5432/tcp"},
@@ -38,7 +38,7 @@ func setupTestDB(t *testing.T) *pgxpool.Pool {
 	host, _ := pgContainer.Host(context.Background())
 	port, _ := pgContainer.MappedPort(context.Background(), "5432")
 
-	dsn := "postgres://test:test@" + host + ":" + port.Port() + "/testdb?sslmode=disable"
+	dsn := "postgres://postgres:postgres@" + host + ":" + port.Port() + "/testShop?sslmode=disable"
 	db, err := pgxpool.New(context.Background(), dsn)
 	require.NoError(t, err)
 
@@ -50,7 +50,7 @@ func setupTestDB(t *testing.T) *pgxpool.Pool {
 }
 
 func execMigrations(t *testing.T, db *sql.DB) {
-	err := goose.Up(db, "/migrations")
+	err := goose.Up(db, "migrations")
 
 	require.NoError(t, err)
 }

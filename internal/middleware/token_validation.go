@@ -1,88 +1,59 @@
 package middleware
 
 import (
-	"github.com/ZhdanovichVlad/go_final_project/internal"
-	"github.com/ZhdanovichVlad/go_final_project/internal/pkg/errorsx"
-	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
+	"fmt"
+	"github.com/ZhdanovichVlad/go_final_project/internal/pkg/jwttoken"
 	"net/http"
 	"strings"
 	"time"
-)
 
-//func ValidateToken() gin.HandlerFunc {
-//	return func(c *gin.Context) {
-//		var header = c.Request.Header["Authorization"]
-//		if header == nil {
-//			c.AbortWithStatusJSON(http.StatusUnauthorized, entity.ErrorMsg{errorsx.Unauthorized.Error())
-//			return
-//		}
-//		var token = header[0]
-//		token = strings.Replace(token, "Bearer ", "", 1)
-//
-//		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-//				// Проверяем алгоритм подписи
-//				if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-//					return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-//				}
-//				// Возвращаем секретный ключ для проверки подписи
-//				return []byte(secretKey), nil
-//			})
-//
-//			if err != nil {
-//				return nil, err
-//			}
-//
-//			// Проверяем, валиден ли токен
-//			if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-//				return claims, nil
-//			} else {
-//				return nil, fmt.Errorf("invalid token")
-//			}
-//
-//		c.Next()
-//	}
-//}
-//}
+	"github.com/ZhdanovichVlad/go_final_project/internal/pkg/errorsx"
+	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
+)
 
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenString := c.GetHeader("Authorization")
 		if tokenString == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": errorsx.AuthHeaderIsEmpty.Error()})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": errorsx.ErrAuthHeaderIsEmpty.Error()})
 			return
 		}
 		tokenString = strings.Replace(tokenString, "Bearer ", "", 1)
 
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, errorsx.UnexpSignedMetod
+				return nil, errorsx.ErrUnexpSignedMetod
 			}
-			return []byte(internal.SecretKey), nil
+			return []byte(jwttoken.SecretKey), nil
 		})
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+			fmt.Println("test 1")
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": errorsx.ErrInvalidToken.Error()})
 			return
 		}
 
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-
 			exp, ok := claims["exp"].(float64)
 			if !ok || time.Now().Unix() > int64(exp) {
-				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Token has expired"})
+				fmt.Println("test 2")
+				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": errorsx.ErrTokenExpired.Error()})
 				return
 			}
 
-			userUuid, ok := claims["userUuid"].(string)
-			if !ok || userUuid == "" {
-				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": errorsx.InvUserUuidInToken.Error()})
+			userUUID, ok := claims["userUUID"].(string)
+			if !ok || userUUID == "" {
+				fmt.Println("test 3")
+				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": errorsx.ErrInvUserUUIDInToken.Error()})
 				return
 			}
 
-			c.Set("userUuid", userUuid)
+			c.Set("userUUID", userUUID)
 			c.Next()
 		} else {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": errorsx.InvalidToken.Error()})
+			fmt.Println("test 4")
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": errorsx.ErrInvalidToken.Error()})
+			return
 		}
 	}
 }

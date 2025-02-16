@@ -23,17 +23,36 @@ func TestGetUserInfo_UserNotFound(t *testing.T) {
 	service := service.NewService(mockRepo, slog.Default(), mockTokenGenerator)
 
 	ctx := context.Background()
-	userName := "testuser"
+	userUUID := "a831f52d-9de2-4af1-8677-4f3d1226fed2"
 
 	merchInfo := &entity.Merch{Name: "pen"}
 
 	answFalse := false
 	mockRepo.EXPECT().
-		ExistsUser(ctx, gomock.Any()).
+		ExistsUser(ctx, &userUUID).
 		Return(&answFalse, nil)
 
-	err := service.BuyMerch(ctx, &userName, merchInfo)
+	err := service.BuyMerch(ctx, &userUUID, merchInfo)
 	assert.ErrorIs(t, err, errorsx.ErrUnknownUser)
+}
+
+func TestGetUserInfo_WrongUUID(t *testing.T) {
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockRepo := mocks.NewMockrepository(ctrl)
+	mockTokenGenerator := mocks.NewMocktokenGenerator(ctrl)
+
+	service := service.NewService(mockRepo, slog.Default(), mockTokenGenerator)
+
+	ctx := context.Background()
+	userUUID := "uuid"
+
+	merchInfo := &entity.Merch{Name: "pen"}
+
+	err := service.BuyMerch(ctx, &userUUID, merchInfo)
+	assert.ErrorIs(t, err, errorsx.ErrWrongUUID)
 }
 
 func TestGetUserInfo_DBError(t *testing.T) {
@@ -47,11 +66,11 @@ func TestGetUserInfo_DBError(t *testing.T) {
 	service := service.NewService(mockRepo, slog.Default(), mockTokenGenerator)
 
 	ctx := context.Background()
-	userUUID := "testuser"
+	userUUID := "a831f52d-9de2-4af1-8677-4f3d1226fed2"
 
 	answTrue := true
 	mockRepo.EXPECT().
-		ExistsUser(ctx, gomock.Any()).
+		ExistsUser(ctx, &userUUID).
 		Return(&answTrue, nil)
 
 	mockRepo.EXPECT().GetUserInfo(ctx, &userUUID).
@@ -73,13 +92,13 @@ func TestServiceInfo_SuccessfulRequest(t *testing.T) {
 	service := service.NewService(mockRepo, slog.Default(), mockTokenGenerator)
 
 	ctx := context.Background()
-	userUUID := "testuser"
+	userUUID := "a831f52d-9de2-4af1-8677-4f3d1226fed2"
 
 	info := &entity.UserInfo{Coins: 50}
 
 	answTrue := true
 	mockRepo.EXPECT().
-		ExistsUser(ctx, gomock.Any()).
+		ExistsUser(ctx, &userUUID).
 		Return(&answTrue, nil)
 
 	mockRepo.EXPECT().GetUserInfo(ctx, &userUUID).
