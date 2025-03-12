@@ -53,6 +53,10 @@ func (s *Storage) GetUserInfo(ctx context.Context, userUUID *string) (*entity.Us
 		Inventory:   *inventory,
 		CoinHistory: *coinHistory,
 	}
+	err = tx.Commit(ctx)
+	if err != nil {
+		return nil, errorsx.ErrDB
+	}
 
 	err = nil
 	return userInfo, nil
